@@ -1,0 +1,93 @@
+{
+  "name": "vuex-stateshot",
+  "version": "0.1.0",
+  "description": "A state snapshot plugin on actions/mutations for Vuex3.1+.",
+  "author": "xiaoluoboding <xiaoluoboding@gmail.com>",
+  "scripts": {
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build --dest docs",
+    "test:unit": "vue-cli-service test:unit",
+    "lint": "vue-cli-service lint",
+    "build:lib": "vue-cli-service build --mode lib --target lib --dest lib src/vuex-stateshot.js",
+    "bundle": "npm run build && npm run build:lib",
+    "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0",
+    "report": "vue-cli-service build --mode lib --target lib --dest lib --report src/vuex-stateshot.js"
+  },
+  "main": "lib/vuex-stateshot.common.js",
+  "unpkg": "lib/vue-stateshot.umd.min.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xiaoluoboding/vuex-stateshot.git"
+  },
+  "homepage": "https://xiaoluoboding.github.io/vuex-stateshot/",
+  "keywords": [
+    "vue",
+    "vuex",
+    "state",
+    "snapshot",
+    "undo-redo",
+    "history-management",
+    "state-management"
+  ],
+  "peerDependencies": {
+    "vuex": "^3.1.2"
+  },
+  "dependencies": {
+    "stateshot": "^1.2.3"
+  },
+  "devDependencies": {
+    "@vue/cli-plugin-babel": "^4.1.0",
+    "@vue/cli-plugin-eslint": "^4.1.0",
+    "@vue/cli-plugin-unit-jest": "^4.1.0",
+    "@vue/cli-plugin-vuex": "^4.1.0",
+    "@vue/cli-service": "^4.1.0",
+    "@vue/eslint-config-standard": "^4.0.0",
+    "@vue/test-utils": "1.0.0-beta.29",
+    "babel-eslint": "^10.0.3",
+    "core-js": "^3.4.3",
+    "eslint": "^5.16.0",
+    "eslint-plugin-html": "^6.0.0",
+    "eslint-plugin-vue": "^5.0.0",
+    "keymaster": "^1.6.2",
+    "less": "^3.10.3",
+    "less-loader": "^5.0.0",
+    "lodash.clonedeep": "^4.5.0",
+    "lodash.debounce": "^4.0.8",
+    "vue-smart-widget": "^0.5.4",
+    "vue-template-compiler": "^2.6.10",
+    "vue": "^2.6.10",
+    "vuex": "^3.1.2"
+  },
+  "eslintConfig": {
+    "root": true,
+    "env": {
+      "node": true
+    },
+    "extends": [
+      "plugin:vue/essential",
+      "@vue/standard"
+    ],
+    "rules": {},
+    "parserOptions": {
+      "parser": "babel-eslint"
+    },
+    "overrides": [
+      {
+        "files": [
+          "**/__tests__/*.{j,t}s?(x)",
+          "**/tests/unit/**/*.spec.{j,t}s?(x)"
+        ],
+        "env": {
+          "jest": true
+        }
+      }
+    ]
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions"
+  ],
+  "jest": {
+    "preset": "@vue/cli-plugin-unit-jest"
+  }
+}
