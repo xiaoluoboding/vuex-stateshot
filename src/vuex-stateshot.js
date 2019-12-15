@@ -2,24 +2,44 @@ import Vue from 'vue'
 import { History } from 'stateshot'
 
 const SCOPE_NAME = 'vuexstateshot'
-const SYNC_STATE = 'SYNC_STATE'
+const SYNC_STATE = '__SYNC_STATE__'
 const STATESHOT_UNDO = 'STATESHOT_UNDO'
 const STATESHOT_REDO = 'STATESHOT_REDO'
 
 class VuexStateshot {
   constructor (store, options) {
     const {
+      // The actions you want snapshot
       actions = [],
-      maxLength = 100
+      // The mutations you want snapshot
+      mutations = [],
+      // Max length saving history states, 100 by default.
+      maxLength = 100,
+      // Debounce time for push in milliseconds, 50 by default.
+      delay = 50,
+      ...others
     } = options
 
-    const history = new History({ maxLength })
+    const history = new History({
+      maxLength,
+      delay,
+      ...others
+    })
 
     this.store = store
     this.actions = actions
+    this.mutations = mutations
     this.history = history
+  }
 
-    Vue.prototype.$stateshot = history
+  getHistoryLength () {
+    /**
+     * There is some wrong with the stateshot.js
+     * The truely history length is $records we need filter the record
+     * Otherwise when you call the undo().get(), the history.length is wrong
+     */
+    // const historyLength = this.history.length
+    return this.history.$records.filter(record => record).length
   }
 
   registerPluginMoudle () {
@@ -30,27 +50,48 @@ class VuexStateshot {
         nextState: {},
         hasUndo: false,
         hasRedo: false,
-        historyLength: 0
+        historyLength: 0,
+        undoCount: 0,
+        redoCount: 0
       },
       actions: {
         // snap a state shot of rootState
-        stateshot: async ({ commit, dispatch, state, rootState }, payload) => {
-          await this.history.pushSync(rootState)
-          commit('SYNC_STATE', {
-            hasUndo: this.history.hasUndo,
-            hasRedo: this.history.hasRedo,
-            historyLength: this.history.length
+        snapshot: async ({ commit, dispatch, state, rootState }, payload) => {
+          await this.history.push(rootState)
+
+          const historyLength = this.getHistoryLength()
+
+          commit(SYNC_STATE, {
+            hasUndo: historyLength - 1 > 0,
+            hasRedo: false,
+            historyLength,
+            undoCount: historyLength - 1,
+            redoCount: 0
           })
         },
         undo: ({ commit, state }, payload) => {
+          const { hasUndo } = state
           const prevState = this.history.undo().get()
-          commit('STATESHOT_UNDO', prevState)
+          if (prevState && hasUndo) commit('STATESHOT_UNDO', prevState)
           return prevState
         },
-        redo: ({ commit }, payload) => {
+        redo: ({ commit, state }, payload) => {
+          const { hasRedo } = state
           const nextState = this.history.redo().get()
-          commit('STATESHOT_REDO', nextState)
+          if (nextState && hasRedo) commit('STATESHOT_REDO', nextState)
           return nextState
+        },
+        reset: ({ commit }, payload) => {
+          this.history.reset()
+          commit(SYNC_STATE, {
+            nextState: {},
+            prevState: {},
+            hasUndo: false,
+            hasRedo: false,
+            historyLength: 0,
+            undoCount: 0,
+            redoCount: 0
+          })
         }
       },
       mutations: {
@@ -58,22 +99,32 @@ class VuexStateshot {
           Object.assign(state, payload)
         },
         [STATESHOT_UNDO] (state, prevState) {
-          if (prevState) state.prevState = prevState
+          state.prevState = prevState
+          state.undoCount -= 1
+          if (state.undoCount === 0) state.hasUndo = false
+          state.redoCount += 1
+          state.hasRedo = state.redoCount > 0
         },
         [STATESHOT_REDO] (state, nextState) {
-          if (nextState) state.nextState = nextState
+          state.nextState = nextState
+          state.redoCount -= 1
+          if (state.redoCount === 0) state.hasRedo = false
+          state.undoCount += 1
+          state.hasUndo = state.undoCount > 0
         }
       },
       getters: {
         hasUndo: state => state.hasUndo,
         hasRedo: state => state.hasRedo,
+        undoCount: state => state.undoCount,
+        redoCount: state => state.redoCount,
         historyLength: state => state.historyLength
       }
     })
   }
 
-  snapStateshot () {
-    this.store.dispatch(`${SCOPE_NAME}/stateshot`)
+  syncState () {
+    this.store.dispatch(`${SCOPE_NAME}/snapshot`)
   }
 
   stateshotFromAction (store) {
@@ -87,7 +138,7 @@ class VuexStateshot {
       },
       after: (action, state) => {
         if (this.actions.includes(action.type)) {
-          this.snapStateshot()
+          this.syncState()
           console.log(
             '%cSync',
             'background: green color: white padding: 2px 4px border-radius: 3px font-weight: bold',
@@ -98,8 +149,15 @@ class VuexStateshot {
     }
   }
 
-  stateshotFromMutation (mutation) {
-
+  stateshotFromMutation (mutation, state) {
+    if (this.mutations.includes(mutation.type)) {
+      this.syncState()
+      console.log(
+        '%cMutation',
+        'background: green color: white padding: 2px 4px border-radius: 3px font-weight: bold',
+        `Sync State... length is: ${this.history.length}`
+      )
+    }
   }
 }
 
@@ -107,10 +165,12 @@ export function createPlugin (options) {
   return store => {
     const plugin = new VuexStateshot(store, options)
 
+    Vue.prototype.$stateshot = plugin
+
     plugin.registerPluginMoudle()
-    plugin.snapStateshot()
+    plugin.syncState()
 
     store.subscribeAction(plugin.stateshotFromAction(store))
-    store.subscribe((mutation, state) => plugin.stateshotFromMutation(mutation))
+    store.subscribe((mutation, state) => plugin.stateshotFromMutation(mutation, state))
   }
 }

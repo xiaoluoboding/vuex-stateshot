@@ -10,15 +10,16 @@ Vue.use(Vuex)
 export default new Vuex.Store({
   state: {
     layout: [
-      { x: 0, y: 0, w: 6, h: 4, i: 'One', color: '#4af' },
-      { x: 6, y: 0, w: 6, h: 2, i: 'Two', color: '#4fa' },
-      { x: 0, y: 4, w: 6, h: 2, i: 'Three', color: '#a4f' },
-      { x: 6, y: 2, w: 6, h: 4, i: 'Four', color: '#af4' },
-      { x: 0, y: 6, w: 12, h: 2, i: 'Five', color: '#f4a' }
-    ]
+      { x: 0, y: 0, w: 6, h: 4, i: 'One', color: '#4AF' },
+      { x: 6, y: 0, w: 6, h: 2, i: 'Two', color: '#4FA' },
+      { x: 0, y: 4, w: 6, h: 2, i: 'Three', color: '#A4F' },
+      { x: 6, y: 2, w: 6, h: 4, i: 'Four', color: '#AF4' },
+      { x: 0, y: 6, w: 12, h: 2, i: 'Five', color: '#F4A' }
+    ],
+    cloneLayout: []
   },
   mutations: {
-    [types.SYNC_STATE] (state, payload) {
+    [types.SET_STATE] (state, payload) {
       Object.assign(state, payload)
     },
     [types.SET_LAYOUT] (state, payload) {
@@ -35,16 +36,39 @@ export default new Vuex.Store({
         const { layout } = nextState
         state.layout = layout
       }
+    },
+    [types.CHANGE_COLOR] (state, payload) {
+      const shuffle = ([...arr]) => {
+        let m = arr.length
+        while (m) {
+          let temp = null
+          const i = Math.floor(Math.random() * m--)
+          temp = arr[m]
+          arr[m] = arr[i]
+          arr[i] = temp
+        }
+        return arr
+      }
+      state.layout = state.layout.map(item => {
+        const color = shuffle(['F', 'A', '4']).join('')
+        return {
+          ...item,
+          color: `#${color}`
+        }
+      })
+    },
+    [types.RESET_LAYOUT] (state, payload) {
+      state.layout = state.cloneLayout
     }
   },
   actions,
   modules: {},
   plugins: [
     createPlugin({
-      actions: [
-        'syncState',
-        'setLayout'
-      ]
+      // The actions you want snapshot
+      actions: [ 'setLayout' ],
+      // The mutations you want snapshot
+      mutations: [ 'CHANGE_COLOR' ]
     })
   ]
 })
