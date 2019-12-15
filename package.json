@@ -29,6 +29,7 @@
     "history-management",
     "state-management"
   ],
+  "license": "MIT",
   "peerDependencies": {
     "vuex": "^3.1.2"
   },

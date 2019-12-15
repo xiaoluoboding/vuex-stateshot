@@ -7,7 +7,7 @@
   <a href="https://github.com/xiaoluoboding/vuex-stateshot"><img src="https://img.shields.io/github/license/xiaoluoboding/vuex-stateshot.svg"></a>
 </p>
 
-💾 A State Snapshot plugin on Actions/Mutations for Vuex3.1x.
+💾 A State Snapshot plugin on Actions/Mutations for Vuex3.1+.
 
 ## Installation
 
@@ -23,7 +23,7 @@ See `/app` works at [Code Sandbox](https://codesandbox.io/s/vuex-stateshot-szx9h
 
 ## Concepts
 
-> The core concepts is base on StateShot.js
+> The core concepts is base on StateShot.js and Vuex3.1+ API `subscribe` & `subscribeAction`
 
 ## Usage
 
