@@ -7,12 +7,12 @@ const STATESHOT_UNDO = 'STATESHOT_UNDO'
 const STATESHOT_REDO = 'STATESHOT_REDO'
 
 class VuexStateshot {
-  constructor (store, options) {
+  constructor (store, modules, options) {
     const {
       // The actions you want snapshot
-      actions = [],
+      // actions = [],
       // The mutations you want snapshot
-      mutations = [],
+      // mutations = [],
       // Max length saving history states, 100 by default.
       maxLength = 100,
       // Debounce time for push in milliseconds, 50 by default.
@@ -27,9 +27,12 @@ class VuexStateshot {
     })
 
     this.store = store
-    this.actions = actions
-    this.mutations = mutations
+    this.modules = modules
+    this.moduleNames = Object.keys(modules).filter(v => v !== 'rootModule')
+    this.actions = this.getTypes('actions')
+    this.mutations = this.getTypes('mutations')
     this.history = history
+    this.rootModule = store._modules.root
   }
 
   getHistoryLength () {
@@ -40,6 +43,28 @@ class VuexStateshot {
      */
     // const historyLength = this.history.length
     return this.history.$records.filter(record => record).length
+  }
+
+  // omit (obj, arr) {
+  //   return Object.keys(obj)
+  //     .filter(k => !arr.includes(k))
+  //     .reduce((acc, key) => ((acc[key] = obj[key]), acc), {})
+  // }
+
+  getTypes (sub) {
+    let types = []
+
+    for (const namespace of this.moduleNames) {
+      const subscribe = this.modules[namespace][sub]
+      const mapedTypes = subscribe && subscribe.map(type => {
+        return `${namespace}/${type}`
+      })
+      types = [...types, mapedTypes]
+    }
+
+    const deepFlatten = arr => [].concat(...arr.map(v => (Array.isArray(v) ? deepFlatten(v) : v)))
+
+    return deepFlatten(types)
   }
 
   registerPluginMoudle () {
@@ -161,9 +186,9 @@ class VuexStateshot {
   }
 }
 
-export function createPlugin (options) {
+export function createPlugin (modules, options) {
   return store => {
-    const plugin = new VuexStateshot(store, options)
+    const plugin = new VuexStateshot(store, modules, options)
 
     Vue.prototype.$stateshot = plugin
 

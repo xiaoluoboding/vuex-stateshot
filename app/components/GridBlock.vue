@@ -56,7 +56,7 @@ const stateshot = createNamespacedHelpers('vuexstateshot')
 export default {
   name: 'GirdBlock',
   computed: {
-    ...mapState({
+    ...mapState('global', {
       layout: state => state.layout
     }),
     ...stateshot.mapGetters([
@@ -77,7 +77,7 @@ export default {
     this.unbindKeys()
   },
   methods: {
-    ...mapActions([
+    ...mapActions('global', [
       'setState',
       'setLayout',
       'undoLayout',
@@ -89,15 +89,15 @@ export default {
       this.setLayout(newLayout)
     },
     async handleUndo () {
-      const prevState = await this.undo()
-      this.undoLayout(prevState)
+      const { global } = await this.undo()
+      this.undoLayout(global)
     },
     async handleRedo () {
-      const nextState = await this.redo()
-      this.redoLayout(nextState)
+      const { global } = await this.redo()
+      this.redoLayout(global)
     },
     handleChangeColor () {
-      this.$store.commit('CHANGE_COLOR')
+      this.$store.commit('global/CHANGE_COLOR')
     },
     handleChangeGrid: debounce(function () {
       const newLayout = [
