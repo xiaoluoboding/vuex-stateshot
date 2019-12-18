@@ -8,20 +8,23 @@ import modules from './modules/index'
 Vue.use(Vuex)
 
 export default new Vuex.Store({
-  state: {},
+  state: {
+    theme: 'light'
+  },
   actions,
   modules,
   plugins: [
     createPlugin(
       {
+        // The namespace of modules
         global: {
           // The actions you want snapshot
           actions: ['syncState', 'setLayout'],
           // The mutations you want snapshot
           mutations: ['CHANGE_COLOR']
         },
-        'model': {
-          actions: ['toggleShow']
+        'global/widget': {
+          actions: ['toggleShowCard']
         }
       },
       {

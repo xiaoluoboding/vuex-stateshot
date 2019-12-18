@@ -1,47 +1,45 @@
-import * as types from '../mutation-types'
+import { global } from '../mutation-types'
 import { makeActions } from '../actions'
 
 const state = {
   layout: [
     { x: 0, y: 0, w: 6, h: 4, i: 'One', color: '#4AF' },
-    { x: 6, y: 0, w: 6, h: 2, i: 'Two', color: '#4FA' },
-    { x: 0, y: 4, w: 6, h: 2, i: 'Three', color: '#A4F' },
-    { x: 6, y: 2, w: 6, h: 4, i: 'Four', color: '#AF4' },
-    { x: 0, y: 6, w: 12, h: 2, i: 'Five', color: '#F4A' }
+    { x: 6, y: 0, w: 6, h: 3, i: 'Two', color: '#4FA' },
+    { x: 0, y: 4, w: 6, h: 3, i: 'Three', color: '#A4F' },
+    { x: 6, y: 3, w: 6, h: 4, i: 'Four', color: '#AF4' },
+    { x: 0, y: 6, w: 12, h: 4, i: 'Five', color: '#F4A' }
   ],
   cloneLayout: []
 }
 
 const actions = {
   ...makeActions({
-    setState: 'SET_STATE',
-    setLayout: 'SET_LAYOUT',
-    undoLayout: 'UNDO_LAYOUT',
-    redoLayout: 'REDO_LAYOUT',
-    resetLayout: 'RESET_LAYOUT'
+    setState: global.SET_STATE,
+    setLayout: global.SET_LAYOUT,
+    undoLayout: global.UNDO_LAYOUT,
+    redoLayout: global.REDO_LAYOUT,
+    resetLayout: global.RESET_LAYOUT
   })
 }
 
 const mutations = {
-  [types.SET_STATE] (state, payload) {
+  [global.SET_STATE] (state, payload) {
     Object.assign(state, payload)
   },
-  [types.SET_LAYOUT] (state, payload) {
+  [global.SET_LAYOUT] (state, payload) {
     state.layout = payload
   },
-  [types.UNDO_LAYOUT] (state, prevState) {
+  [global.UNDO_LAYOUT] (state, prevState) {
     if (prevState) {
-      const { layout } = prevState
-      state.layout = layout
+      Object.assign(state, prevState)
     }
   },
-  [types.REDO_LAYOUT] (state, nextState) {
+  [global.REDO_LAYOUT] (state, nextState) {
     if (nextState) {
-      const { layout } = nextState
-      state.layout = layout
+      Object.assign(state, nextState)
     }
   },
-  [types.CHANGE_COLOR] (state, payload) {
+  [global.CHANGE_COLOR] (state, payload) {
     const shuffle = ([...arr]) => {
       let m = arr.length
       while (m) {
@@ -61,8 +59,28 @@ const mutations = {
       }
     })
   },
-  [types.RESET_LAYOUT] (state, payload) {
+  [global.RESET_LAYOUT] (state, payload) {
     state.layout = state.cloneLayout
+  }
+}
+
+// nested modules
+const modules = {
+  widget: {
+    namespaced: true,
+    state: {
+      isShowCard: false
+    },
+    actions: {
+      ...makeActions({
+        toggleShowCard: global.widget.TOGGLE_SHOW_CARD
+      })
+    },
+    mutations: {
+      [global.widget.TOGGLE_SHOW_CARD] (state, payload) {
+        state.isShowCard = !state.isShowCard
+      }
+    }
   }
 }
 
@@ -70,5 +88,6 @@ export default {
   namespaced: true,
   state,
   actions,
-  mutations
+  mutations,
+  modules
 }

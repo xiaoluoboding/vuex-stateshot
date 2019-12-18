@@ -13,31 +13,45 @@
       <button @click="handleChangeColor">Change Color</button>
     </div>
 
+    <div class="button-group namespaced">
+      <label for="mutations">Nested Moudles Actions:</label>
+      <button @click="toggleShowCard">Toggle Show Card</button>
+    </div>
+
     <div class="button-group custom">
       <label for="mutations">Custom:</label>
       <button @click="handleChangeGrid">Change Grid</button>
+      <button @click="handleResetGrid">Reset Grid</button>
     </div>
 
-    <div class="button-group restor">
+    <div class="button-group restore">
       <label for="mutations">Restore:</label>
-      <button @click="handleResetGrid">Reset Grid</button>
       <button @click="handleResetHistory">Reset History</button>
     </div>
 
     <smart-widget-grid
       :margin="[5, 5]"
+      :row-height="36"
       :layout="layout"
       @layout-updated="handleLayoutUpdated"
     >
       <smart-widget
         v-for="item in layout"
-        simple
+        :simple="!isShowCard"
         shadow="never"
         :padding="[0, 0]"
         :key="item.i"
         :slot="item.i"
       >
-        <div class="layout-center" :style="{'background-color': item.color}">
+        <template v-if="isShowCard" >
+          <div slot="title" class="widget-title">
+            <span>Card {{item.i}}</span>
+          </div>
+          <div class="layout-center" :style="{'background-color': item.color}">
+            Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptatibus quia, nulla!
+          </div>
+        </template>
+        <div class="layout-center" :style="{'background-color': item.color}" v-else>
           <h3>{{ item.i }}</h3>
         </div>
       </smart-widget>
@@ -64,7 +78,10 @@ export default {
       'redoCount',
       'hasUndo',
       'hasRedo'
-    ])
+    ]),
+    ...mapState('global/widget', {
+      isShowCard: state => state.isShowCard
+    })
   },
   mounted () {
     // clone the init layout
@@ -84,6 +101,7 @@ export default {
       'redoLayout',
       'resetLayout'
     ]),
+    ...mapActions('global/widget', ['toggleShowCard']),
     ...stateshot.mapActions(['undo', 'redo', 'reset']),
     handleLayoutUpdated (newLayout) {
       this.setLayout(newLayout)
@@ -116,10 +134,11 @@ export default {
        * snapshot the state right now, and the param is the state
        */
 
-      this.$stateshot.syncState(this.$store.state)
+      this.$stateshot.syncState('global')
     }, 333),
     handleResetGrid () {
       this.resetLayout()
+      this.$stateshot.syncState('global')
     },
     handleResetHistory () {
       this.reset()
@@ -127,11 +146,11 @@ export default {
     bindKeys () {
       const self = this
       const bindUndo = () => {
-        self.handleUndo()
+        self.hasUndo && self.handleUndo()
         return false
       }
       const bindRedo = () => {
-        self.handleRedo()
+        self.hasRedo && self.handleRedo()
         return false
       }
       key('⌘+z, ctrl+z', bindUndo)
@@ -158,16 +177,19 @@ export default {
 <!-- Add 'scoped' attribute to limit CSS to this component only -->
 <style scoped lang='less'>
 .grid-block {
-  width: 640px;
+  width: 750px;
   margin: 0 auto;
   h1 {
     margin-bottom: 60px;
+  }
+  .widget-title {
+    margin-left: 10px;
   }
 }
 .button-group {
   display: flex;
   align-items: center;
-  margin: 40px 0;
+  margin: 0 0 20px;
   label {
     width: 120px;
     margin-right: 20px;
