@@ -14,7 +14,7 @@
     </div>
 
     <div class="button-group namespaced">
-      <label for="mutations">Nested Moudles Actions:</label>
+      <label for="mutations">Nested Actions:</label>
       <button @click="toggleShowCard">Toggle Show Card</button>
     </div>
 
@@ -22,6 +22,14 @@
       <label for="mutations">Custom:</label>
       <button @click="handleChangeGrid">Change Grid</button>
       <button @click="handleResetGrid">Reset Grid</button>
+    </div>
+
+    <div class="button-group subscribe">
+      <label for="mutations">Subscribe Toggle:</label>
+      <button @click="unsubscribeActions">Unsubscribe Actions</button>
+      <button @click="subscribeActions">Subscribe Actions</button>
+      <button @click="unsubscribeMutations">Unsubscribe Mutations</button>
+      <button @click="subscribeMutations">Subscribe Mutations</button>
     </div>
 
     <div class="button-group restore">
@@ -140,6 +148,18 @@ export default {
       this.resetLayout()
       this.$stateshot.syncState('global')
     },
+    unsubscribeActions () {
+      this.$stateshot.unsubscribeAction()
+    },
+    subscribeActions () {
+      this.$stateshot.subscribeAction()
+    },
+    unsubscribeMutations () {
+      this.$stateshot.unsubscribe()
+    },
+    subscribeMutations () {
+      this.$stateshot.subscribe()
+    },
     handleResetHistory () {
       this.reset()
     },
@@ -194,6 +214,8 @@ export default {
     width: 120px;
     margin-right: 20px;
     text-align: right;
+    font-size: 14px;
+    font-weight: 500;
   }
   button {
     padding: 8px 12px;

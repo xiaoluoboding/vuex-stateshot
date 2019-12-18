@@ -17,19 +17,26 @@ class VuexStateshot {
     } = options
 
     const history = new History({
-      maxLength,
+      maxLength: maxLength + 1,
       delay,
       ...others
     })
 
+    // store state
     this.store = store
     this.modules = modules
     this.moduleNames = Object.keys(modules).filter(v => v !== 'rootModule')
+    this.rootModule = store._modules.root
+
+    // subscribe state
     this.actions = this.getSubscribeTypes('actions')
     this.mutations = this.getSubscribeTypes('mutations')
+    this.unsubscribeAction = null
+    this.unsubscribe = null
+
+    // history state
     this.history = history
-    this.rootModule = store._modules.root
-    console.log(this.store)
+    // console.log(this.store)
   }
 
   getHistoryLength () {
@@ -199,18 +206,25 @@ class VuexStateshot {
       )
     }
   }
+
+  subscribeAction () {
+    this.unsubscribeAction = this.store.subscribeAction(this.stateshotFromAction(this.store))
+  }
+
+  subscribe () {
+    this.unsubscribe = this.store.subscribe((mutation, state) => this.stateshotFromMutation(mutation, state))
+  }
 }
 
 export function createPlugin (modules, options) {
   return store => {
     const plugin = new VuexStateshot(store, modules, options)
 
-    Vue.prototype.$stateshot = plugin
-
     plugin.registerPluginMoudle()
     plugin.syncState()
+    plugin.subscribeAction()
+    plugin.subscribe()
 
-    store.subscribeAction(plugin.stateshotFromAction(store))
-    store.subscribe((mutation, state) => plugin.stateshotFromMutation(mutation, state))
+    Vue.prototype.$stateshot = plugin
   }
 }
