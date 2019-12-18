@@ -7,12 +7,8 @@ const STATESHOT_UNDO = 'STATESHOT_UNDO'
 const STATESHOT_REDO = 'STATESHOT_REDO'
 
 class VuexStateshot {
-  constructor (store, options) {
+  constructor (store, modules, options) {
     const {
-      // The actions you want snapshot
-      actions = [],
-      // The mutations you want snapshot
-      mutations = [],
       // Max length saving history states, 100 by default.
       maxLength = 100,
       // Debounce time for push in milliseconds, 50 by default.
@@ -21,15 +17,26 @@ class VuexStateshot {
     } = options
 
     const history = new History({
-      maxLength,
+      maxLength: maxLength + 1,
       delay,
       ...others
     })
 
+    // store state
     this.store = store
-    this.actions = actions
-    this.mutations = mutations
+    this.modules = modules
+    this.moduleNames = Object.keys(modules)
+    this.rootModule = store._modules.root
+
+    // subscribe state
+    this.actions = this.getSubscribeTypes('actions')
+    this.mutations = this.getSubscribeTypes('mutations')
+    this.unsubscribeAction = null
+    this.unsubscribe = null
+
+    // history state
     this.history = history
+    // console.log(this.store)
   }
 
   getHistoryLength () {
@@ -40,6 +47,45 @@ class VuexStateshot {
      */
     // const historyLength = this.history.length
     return this.history.$records.filter(record => record).length
+  }
+
+  /**
+   * Get the wanted subscribe types with namespace
+   * @param {*} context 'actions/mutations'
+   */
+  getSubscribeTypes (context) {
+    let types = []
+
+    for (const namespace of this.moduleNames) {
+      const subscribe = this.modules[namespace][context]
+      const mapedTypes = subscribe && subscribe.map(type => {
+        return namespace === 'rootModule' ? type : `${namespace}/${type}`
+      })
+      types = [...types, mapedTypes]
+    }
+
+    const deepFlatten = arr => [].concat(...arr.map(v => (Array.isArray(v) ? deepFlatten(v) : v)))
+
+    return deepFlatten(types.filter(v => v))
+  }
+
+  findNamespacedModule (namespace, moduleTree = this.rootModule) {
+    if (namespace === 'root') return this.rootModule
+    const parts = namespace.split('/')
+    if (!parts.length) return false
+
+    const subtree = moduleTree._children[parts[0]]
+    const subpath = parts.slice(1).join('/')
+    if (subtree && subtree.namespaced) {
+      return parts.length === 1 ? subtree : this.findNamespacedModule(subpath, subtree)
+    } else {
+      for (const name in moduleTree._children) {
+        const namespacedMoudle = this.findNamespacedModule(namespace, moduleTree._children[name])
+        if (namespacedMoudle) return namespacedMoudle
+      }
+    }
+
+    return false
   }
 
   registerPluginMoudle () {
@@ -123,8 +169,9 @@ class VuexStateshot {
     })
   }
 
-  syncState () {
-    this.store.dispatch(`${SCOPE_NAME}/snapshot`)
+  syncState (namespace = 'root') {
+    const { state } = this.findNamespacedModule(namespace, this.rootModule)
+    this.store.dispatch(`${SCOPE_NAME}/snapshot`, state)
   }
 
   stateshotFromAction (store) {
@@ -132,7 +179,7 @@ class VuexStateshot {
       before: (action, state) => {
         console.log(
           '%cAction',
-          'background: blue color: white padding: 2px 4px border-radius: 3px font-weight: bold',
+          'background: blue; color: white; padding: 2px 4px; border-radius: 3px; font-weight: bold;',
           `${action.type}`
         )
       },
@@ -141,7 +188,7 @@ class VuexStateshot {
           this.syncState()
           console.log(
             '%cSync',
-            'background: green color: white padding: 2px 4px border-radius: 3px font-weight: bold',
+            'background: green; color: white; padding: 2px 4px; border-radius: 3px; font-weight: bold;',
             `Sync State... length is: ${this.history.length}`
           )
         }
@@ -154,23 +201,30 @@ class VuexStateshot {
       this.syncState()
       console.log(
         '%cMutation',
-        'background: green color: white padding: 2px 4px border-radius: 3px font-weight: bold',
+        'background: green; color: white; padding: 2px 4px; border-radius: 3px; font-weight: bold;',
         `Sync State... length is: ${this.history.length}`
       )
     }
   }
+
+  subscribeAction () {
+    this.unsubscribeAction = this.store.subscribeAction(this.stateshotFromAction(this.store))
+  }
+
+  subscribe () {
+    this.unsubscribe = this.store.subscribe((mutation, state) => this.stateshotFromMutation(mutation, state))
+  }
 }
 
-export function createPlugin (options) {
+export function createPlugin (modules, options) {
   return store => {
-    const plugin = new VuexStateshot(store, options)
-
-    Vue.prototype.$stateshot = plugin
+    const plugin = new VuexStateshot(store, modules, options)
 
     plugin.registerPluginMoudle()
     plugin.syncState()
+    plugin.subscribeAction()
+    plugin.subscribe()
 
-    store.subscribeAction(plugin.stateshotFromAction(store))
-    store.subscribe((mutation, state) => plugin.stateshotFromMutation(mutation, state))
+    Vue.prototype.$stateshot = plugin
   }
 }
