@@ -14,7 +14,7 @@ const state = {
 
 const actions = {
   ...makeActions({
-    setState: global.SET_STATE,
+    setGLobalState: global.SET_GLOBAL_STATE,
     setLayout: global.SET_LAYOUT,
     undoLayout: global.UNDO_LAYOUT,
     redoLayout: global.REDO_LAYOUT,
@@ -23,7 +23,7 @@ const actions = {
 }
 
 const mutations = {
-  [global.SET_STATE] (state, payload) {
+  [global.SET_GLOBAL_STATE] (state, payload) {
     Object.assign(state, payload)
   },
   [global.SET_LAYOUT] (state, payload) {

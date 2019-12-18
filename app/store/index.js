@@ -3,6 +3,7 @@ import Vuex from 'vuex'
 
 import { createPlugin } from '../../src/vuex-stateshot'
 import * as actions from './actions'
+import * as types from './mutation-types'
 import modules from './modules/index'
 
 Vue.use(Vuex)
@@ -12,10 +13,21 @@ export default new Vuex.Store({
     theme: 'light'
   },
   actions,
+  mutations: {
+    [types.SET_STATE] (state, payload) {
+      Object.assign(state, payload)
+    },
+    [types.SET_THEME] (state, payload) {
+      state.theme = payload
+    }
+  },
   modules,
   plugins: [
     createPlugin(
       {
+        rootModule: {
+          actions: ['setTheme']
+        },
         // The namespace of modules
         global: {
           // The actions you want snapshot

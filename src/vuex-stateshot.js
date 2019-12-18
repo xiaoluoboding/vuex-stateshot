@@ -25,7 +25,7 @@ class VuexStateshot {
     // store state
     this.store = store
     this.modules = modules
-    this.moduleNames = Object.keys(modules).filter(v => v !== 'rootModule')
+    this.moduleNames = Object.keys(modules)
     this.rootModule = store._modules.root
 
     // subscribe state
@@ -59,7 +59,7 @@ class VuexStateshot {
     for (const namespace of this.moduleNames) {
       const subscribe = this.modules[namespace][context]
       const mapedTypes = subscribe && subscribe.map(type => {
-        return `${namespace}/${type}`
+        return namespace === 'rootModule' ? type : `${namespace}/${type}`
       })
       types = [...types, mapedTypes]
     }
