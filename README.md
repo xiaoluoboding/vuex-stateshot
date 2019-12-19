@@ -42,10 +42,20 @@ const store = new Vuex.Store({
   ...,
   plugins: [
     createPlugin({
-      // The actions you want snapshot
-      actions: [],
-      // The mutations you want snapshot
-      mutations: []
+      // The special root module key
+      rootModule: {
+        // The actions you want snapshot
+        actions: [],
+        // The mutations you want snapshot
+        mutations: []
+      },
+      // The custom module name
+      __MODULE__NAME__: {
+        // The actions you want snapshot
+        actions: [],
+        // The mutations you want snapshot
+        mutations: []
+      }
     })
   ]
 })
@@ -73,14 +83,67 @@ export default {
 }
 ```
 
+Or use the module namespace (`vuexstateshot`) as the first argument to map helpers
+
+```javascript
+import { mapGetters, mapActions } from 'vuex'
+
+export default {
+  ...,
+
+  computed: {
+    ...mapGetters('vuexstateshot', [ 'undoCount', 'redoCount', 'hasUndo', 'hasRedo' ])
+  },
+
+  methods: {
+    ...mapActions('vuexstateshot', ['undo', 'redo', 'reset'])
+  }
+}
+```
+
 ## API
 
 ### Plugin Options
 
 | Name | Description | Type |
 |:--------|:--------|:--------:|
-| actions | The actions you want snapshot. | Array |
-| mutations | The mutations you want snapshot. | Array |
+| first argument | Provide the relation statement of module namespace and the actions/mutations you want snapshot | Object |
+| second argument | The options of stateshot [history](https://github.com/gaoding-inc/stateshot#history) instance. | Object |
+
+** The is a example **
+
+```js
+plugins: [
+  createPlugin(
+    // first argument
+    {
+      // The special root module key
+      rootModule: {
+        // The actions you want snapshot
+        actions: ['setTheme']
+      },
+      // The custom module name
+      global: {
+        // The actions you want snapshot
+        actions: ['syncState', 'setLayout'],
+        // The mutations you want snapshot
+        mutations: ['CHANGE_COLOR']
+      },
+      // The nested custom module name
+      'global/widget': {
+        actions: ['toggleShowCard']
+      }
+    },
+    // second argument
+    {
+      maxLength: 20
+    }
+  )
+]
+```
+
+**history Options**
+
 | maxLength | Max length saving history states, 100 by default. | Number |
 | delay | Debounce time for push in milliseconds, 50 by default. | Number |
 
@@ -89,13 +152,17 @@ export default {
 > Vuex Stateshot also provide a custom method to record the state into history
 
 ```javascript
-this.$stateshot.syncState(this.$store.state)
+this.$stateshot.syncState()
 ```
 
 | Name | Description | Callback |
 |:--------|:--------|:--------:|
 | syncState | Custom to record the state, not by subscribe the `action/mutation` | - |
 | getHistoryLength | Get the current state history length | - |
+| unsubscribeAction | When you want stop subscribe `Action` programly | - |
+| subscribeAction | Used when you want resubscribe `Action` after call `unsubscribeAction` | - |
+| unsubscribe | When you want stop subscribe `Mutations` programly | - |
+| subscribe | Used when you want resubscribe `Mutations` after call `unsubscribe` | - |
 
 ### Namespaced Helpers
 
