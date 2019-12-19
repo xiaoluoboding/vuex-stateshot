@@ -1,6 +1,6 @@
 {
   "name": "vuex-stateshot",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "A state snapshot plugin on actions/mutations for Vuex3.1+.",
   "author": "xiaoluoboding <xiaoluoboding@gmail.com>",
   "scripts": {
@@ -13,7 +13,7 @@
     "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0",
     "report": "vue-cli-service build --mode lib --target lib --dest lib --report src/vuex-stateshot.js"
   },
-  "main": "lib/vuex-stateshot.common.js",
+  "main": "lib/vuex-stateshot.umd.min.js",
   "unpkg": "lib/vue-stateshot.umd.min.js",
   "repository": {
     "type": "git",
