@@ -1,7 +1,7 @@
 const path = require('path')
 
 const isProd = process.env.NODE_ENV === 'production'
-const isLib = process.env.VUE_APP_BUILD_MODE === 'lib'
+// const isLib = process.env.VUE_APP_BUILD_MODE === 'lib'
 const resolve = dir => path.join(__dirname, dir)
 
 const setChainWebpack = config => {
@@ -24,15 +24,15 @@ const setChainWebpack = config => {
   }
 }
 
-const setConfigureWebpack = config => {
-  if (isLib) {
-    config.output = {
-      ...config.output,
-      library: 'VuexStateshot',
-      libraryExport: 'default'
-    }
-  }
-}
+// const setConfigureWebpack = config => {
+//   if (isLib) {
+//     config.output = {
+//       ...config.output,
+//       library: 'VuexStateshot',
+//       libraryExport: 'default'
+//     }
+//   }
+// }
 
 module.exports = {
   publicPath: './',
@@ -44,7 +44,7 @@ module.exports = {
   lintOnSave: true,
   productionSourceMap: false,
   chainWebpack: config => setChainWebpack(config),
-  configureWebpack: config => setConfigureWebpack(config),
+  // configureWebpack: config => setConfigureWebpack(config),
   devServer: {
     port: 8383,
     open: true,
