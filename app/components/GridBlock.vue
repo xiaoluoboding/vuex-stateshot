@@ -97,7 +97,7 @@ export default {
   },
   mounted () {
     // clone the init layout
-    this.setGLobalState({
+    this.setGlobalState({
       cloneLayout: cloneDeep(this.layout)
     })
     this.bindKeys()
@@ -108,7 +108,7 @@ export default {
   methods: {
     ...mapActions(['setState', 'setTheme']),
     ...mapActions('global', [
-      'setGLobalState',
+      'setGlobalState',
       'setLayout',
       'resetLayout'
     ]),
@@ -120,12 +120,12 @@ export default {
     async handleUndo () {
       const { theme, global } = await this.undo()
       this.setState({ theme })
-      this.setGLobalState({ ...global })
+      this.setGlobalState({ ...global })
     },
     async handleRedo () {
       const { theme, global } = await this.redo()
       this.setState({ theme })
-      this.setGLobalState({ ...global })
+      this.setGlobalState({ ...global })
     },
     handleChangeColor () {
       this.$store.commit('global/CHANGE_COLOR')
