@@ -102,8 +102,8 @@ class VuexStateshot {
       },
       actions: {
         // snap a state shot of rootState
-        snapshot: async ({ commit, dispatch, state, rootState }, payload) => {
-          await this.history.push(rootState)
+        snapshot: ({ commit, dispatch, state, rootState }, payload) => {
+          this.history.pushSync(rootState)
 
           const historyLength = this.getHistoryLength()
 

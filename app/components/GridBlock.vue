@@ -106,7 +106,7 @@ export default {
     this.unbindKeys()
   },
   methods: {
-    ...mapActions(['setState', 'setTheme']),
+    ...mapActions(['setState']),
     ...mapActions('global', [
       'setGlobalState',
       'setLayout',
@@ -131,7 +131,7 @@ export default {
       this.$store.commit('global/CHANGE_COLOR')
     },
     handleChangeTheme () {
-      this.setTheme(this.isDarkmode ? 'light' : 'dark')
+      this.$store.commit('SET_THEME', this.isDarkmode ? 'light' : 'dark')
     },
     handleChangeGrid: debounce(function () {
       const newLayout = [
@@ -142,7 +142,7 @@ export default {
         { x: 0, y: 7, w: 12, h: 4, i: 'Five', color: '#F4A' }
       ]
 
-      this.setGLobalState({ layout: newLayout })
+      this.setGlobalState({ layout: newLayout })
 
       /**
        * May be there is a lot of actions/mutations you want call
