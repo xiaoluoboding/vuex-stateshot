@@ -3,10 +3,12 @@
     <h1>Play with the Widget 👇</h1>
 
     <div class="button-group actions">
-      <label for="actions">Actions:</label>
-      <button @click="handleUndo" :disabled="!hasUndo">Undo(<strong>{{undoCount}}</strong>)(⌘ + Z)</button>
-      <button @click="handleRedo" :disabled="!hasRedo">Redo(<strong>{{redoCount}}</strong>)(⌘ + Y)</button>
+      <label for="actions">Undo/Redo:</label>
+      <button @click="handleUndo" :disabled="!hasUndo">Undo(<strong>{{undoCount}}</strong>)(Ctrl/⌘ + Z)</button>
+      <button @click="handleRedo" :disabled="!hasRedo">Redo(<strong>{{redoCount}}</strong>)(Ctrl/⌘ + Y)</button>
     </div>
+
+    <hr>
 
     <div class="button-group mutations">
       <label for="mutations">Mutations:</label>
@@ -37,6 +39,8 @@
       <label for="mutations">Restore:</label>
       <button @click="handleResetHistory">Reset History</button>
     </div>
+
+    <hr>
 
     <smart-widget-grid
       :margin="[5, 5]"
@@ -97,7 +101,7 @@ export default {
   },
   mounted () {
     // clone the init layout
-    this.setGLobalState({
+    this.setGlobalState({
       cloneLayout: cloneDeep(this.layout)
     })
     this.bindKeys()
@@ -106,9 +110,9 @@ export default {
     this.unbindKeys()
   },
   methods: {
-    ...mapActions(['setState', 'setTheme']),
+    ...mapActions(['setState']),
     ...mapActions('global', [
-      'setGLobalState',
+      'setGlobalState',
       'setLayout',
       'resetLayout'
     ]),
@@ -120,18 +124,18 @@ export default {
     async handleUndo () {
       const { theme, global } = await this.undo()
       this.setState({ theme })
-      this.setGLobalState({ ...global })
+      this.setGlobalState({ ...global })
     },
     async handleRedo () {
       const { theme, global } = await this.redo()
       this.setState({ theme })
-      this.setGLobalState({ ...global })
+      this.setGlobalState({ ...global })
     },
     handleChangeColor () {
       this.$store.commit('global/CHANGE_COLOR')
     },
     handleChangeTheme () {
-      this.setTheme(this.isDarkmode ? 'light' : 'dark')
+      this.$store.commit('SET_THEME', this.isDarkmode ? 'light' : 'dark')
     },
     handleChangeGrid: debounce(function () {
       const newLayout = [
@@ -142,7 +146,7 @@ export default {
         { x: 0, y: 7, w: 12, h: 4, i: 'Five', color: '#F4A' }
       ]
 
-      this.setGLobalState({ layout: newLayout })
+      this.setGlobalState({ layout: newLayout })
 
       /**
        * May be there is a lot of actions/mutations you want call

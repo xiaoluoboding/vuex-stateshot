@@ -110,7 +110,7 @@ export default {
 | first argument | Provide the relation statement of module namespace and the actions/mutations you want snapshot | Object |
 | second argument | The options of stateshot [history](https://github.com/gaoding-inc/stateshot#history) instance. | Object |
 
-** The is a example **
+**The is a example**
 
 ```js
 plugins: [
@@ -134,7 +134,7 @@ plugins: [
         actions: ['toggleShowCard']
       }
     },
-    // second argument
+    // second argument optionally
     {
       maxLength: 20
     }
@@ -144,6 +144,8 @@ plugins: [
 
 **history Options**
 
+| Name | Description | Type |
+|:--------|:--------|:--------:|
 | maxLength | Max length saving history states, 100 by default. | Number |
 | delay | Debounce time for push in milliseconds, 50 by default. | Number |
 
@@ -168,8 +170,8 @@ this.$stateshot.syncState()
 
 **mapGetters**
 
-> When plugin first time sync the base state, the undoCount = 1, and hasUndo = true
-> It's all begin
+> When plugin first time sync the base state, the undoCount = 1, and hasUndo = true;
+> It's all begin;
 > When you call the undo method, you have the state can redo
 
 | Name | Description | Type |

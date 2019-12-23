@@ -26,7 +26,7 @@ export default new Vuex.Store({
     createPlugin(
       {
         rootModule: {
-          actions: ['setTheme']
+          mutations: ['SET_THEME']
         },
         // The namespace of modules
         global: {

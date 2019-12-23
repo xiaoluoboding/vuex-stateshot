@@ -16,4 +16,3 @@ export const makeActions = (types = {}) => {
 }
 
 export const setState = makeAction('SET_STATE')
-export const setTheme = makeAction('SET_THEME')

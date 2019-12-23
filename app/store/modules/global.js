@@ -14,10 +14,8 @@ const state = {
 
 const actions = {
   ...makeActions({
-    setGLobalState: global.SET_GLOBAL_STATE,
+    setGlobalState: global.SET_GLOBAL_STATE,
     setLayout: global.SET_LAYOUT,
-    undoLayout: global.UNDO_LAYOUT,
-    redoLayout: global.REDO_LAYOUT,
     resetLayout: global.RESET_LAYOUT
   })
 }
@@ -29,15 +27,8 @@ const mutations = {
   [global.SET_LAYOUT] (state, payload) {
     state.layout = payload
   },
-  [global.UNDO_LAYOUT] (state, prevState) {
-    if (prevState) {
-      Object.assign(state, prevState)
-    }
-  },
-  [global.REDO_LAYOUT] (state, nextState) {
-    if (nextState) {
-      Object.assign(state, nextState)
-    }
+  [global.RESET_LAYOUT] (state, payload) {
+    state.layout = state.cloneLayout
   },
   [global.CHANGE_COLOR] (state, payload) {
     const shuffle = ([...arr]) => {
@@ -58,9 +49,6 @@ const mutations = {
         color: `#${color}`
       }
     })
-  },
-  [global.RESET_LAYOUT] (state, payload) {
-    state.layout = state.cloneLayout
   }
 }
 
