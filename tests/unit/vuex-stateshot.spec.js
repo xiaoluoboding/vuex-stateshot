@@ -29,7 +29,7 @@ describe.each([
         vm.setTheme('dark')
         expect(vm.theme).toBe('dark')
         await flushPromises()
-        logshot(vm)
+        // logshot(vm)
         expect(vm.hasUndo).toBeTruthy()
         expect(vm.hasRedo).toBeFalsy()
         expect(vm.undoCount).toBe(1)

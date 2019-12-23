@@ -1,6 +1,6 @@
 import { createLocalVue, shallowMount } from '@vue/test-utils'
 import Vuex, { createNamespacedHelpers, mapState, mapMutations } from 'vuex'
-import { createPlugin } from '../../src/vuex-stateshot'
+import { createPlugin } from '../../lib/vuex-stateshot.umd.min'
 
 const PLUGIN_NAME = 'vuexstateshot'
 

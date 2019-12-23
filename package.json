@@ -1,6 +1,6 @@
 {
   "name": "vuex-stateshot",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "description": "A state snapshot plugin on actions/mutations for Vuex3.1+.",
   "author": "xiaoluoboding <xiaoluoboding@gmail.com>",
   "scripts": {
