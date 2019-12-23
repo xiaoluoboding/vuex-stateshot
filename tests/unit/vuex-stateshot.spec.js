@@ -1,110 +1,159 @@
-import { createLocalVue, mount } from '@vue/test-utils'
 import flushPromises from 'flush-promises'
-import Vuex, { createNamespacedHelpers, mapState, mapActions } from 'vuex'
-import { createPlugin } from '../../src/vuex-stateshot'
+
+import { logshot, createApp } from './helper'
 
 describe.each([
-  ['namespaced module', 'global', 'global']
-  // ['namespaced module under namespaced module', 'global/widget', 'widget']
-])('VuexStateshot', (description, namespace, initialValue) => {
-  describe(description, () => {
-    it('sets initial states', () => {
-      const { vm } = createApp(namespace)
-      expect(vm.hasUndo).toBeFalsy()
-      expect(vm.hasRedo).toBeFalsy()
-      expect(vm.undoCount).toBe(0)
-      expect(vm.redoCount).toBe(0)
-      expect(vm.historyLength).toBe(1)
+  ['Test root module', 'rootModule', 'first'],
+  ['Test namespaced module', 'global', 'second']
+])('VuexStateshot', (description, namespace, flag) => {
+  if (flag === 'first') {
+    describe(description, () => {
+      let vm = null
+
+      beforeAll(() => {
+        const wrapper = createApp(namespace)
+        vm = wrapper.vm
+      })
+
+      it('sets initial states', () => {
+        expect(vm.hasUndo).toBeFalsy()
+        expect(vm.hasRedo).toBeFalsy()
+        expect(vm.undoCount).toBe(0)
+        expect(vm.redoCount).toBe(0)
+        expect(vm.historyLength).toBe(1)
+      })
+
+      it('commit a mutation on root module', async () => {
+        expect(vm.theme).toBe('light')
+        vm.setTheme('dark')
+        expect(vm.theme).toBe('dark')
+        await flushPromises()
+        logshot(vm)
+        expect(vm.hasUndo).toBeTruthy()
+        expect(vm.hasRedo).toBeFalsy()
+        expect(vm.undoCount).toBe(1)
+        expect(vm.redoCount).toBe(0)
+        expect(vm.historyLength).toBe(2)
+      })
+
+      it('call undo', async () => {
+        const { theme } = await vm.undo()
+        expect(theme).toBe('light')
+        expect(vm.hasUndo).toBeFalsy()
+        expect(vm.hasRedo).toBeTruthy()
+        expect(vm.undoCount).toBe(0)
+        expect(vm.redoCount).toBe(1)
+      })
+
+      it('call redo', async () => {
+        const { theme } = await vm.redo()
+        expect(theme).toBe('dark')
+        expect(vm.hasUndo).toBeTruthy()
+        expect(vm.hasRedo).toBeFalsy()
+        expect(vm.undoCount).toBe(1)
+        expect(vm.redoCount).toBe(0)
+      })
+
+      it('call reset history', () => {
+        vm.reset()
+        expect(vm.hasUndo).toBeFalsy()
+        expect(vm.hasRedo).toBeFalsy()
+        expect(vm.undoCount).toBe(0)
+        expect(vm.redoCount).toBe(0)
+        expect(vm.historyLength).toBe(0)
+      })
     })
-
-    it('change root module theme', async () => {
-      const { vm } = createApp(namespace)
-      expect(vm.theme).toBe('light')
-      vm.setTheme('dark')
-      expect(vm.theme).toBe('dark')
-      await flushPromises()
-      // console.group('【vuex-stateshot】')
-      // console.log(vm.hasUndo)
-      // console.log(vm.hasRedo)
-      // console.log(vm.undoCount)
-      // console.log(vm.redoCount)
-      // console.log(vm.historyLength)
-      // console.groupEnd()
-      expect(vm.hasUndo).toBeTruthy()
-      expect(vm.hasRedo).toBeFalsy()
-      expect(vm.undoCount).toBe(1)
-      expect(vm.redoCount).toBe(0)
-      expect(vm.historyLength).toBe(2)
-    })
-  })
-})
-
-function createComponent (namespace) {
-  // const helpers = createNamespacedHelpers(namespace)
-  const stateshot = createNamespacedHelpers('vuexstateshot')
-
-  return {
-    template: '<div></div>',
-    computed: {
-      ...mapState(['theme']),
-      ...stateshot.mapGetters(['hasUndo', 'hasRedo', 'undoCount', 'redoCount', 'historyLength'])
-    },
-    methods: {
-      ...mapActions(['setTheme']),
-      // ...mapMutations(['setTheme']),
-      ...stateshot.mapActions(['snapshot', 'undo', 'redo', 'reset'])
-    }
   }
-}
 
-function createStore (plugin) {
-  return new Vuex.Store({
-    state: { theme: 'light' },
-    actions: {
-      setTheme: ({ commit }, payload) => {
-        commit('setTheme', payload)
-      }
-    },
-    mutations: {
-      setTheme: (state, payload) => { state.theme = payload }
-    },
-    modules: {
-      // global(namespaced)
-      // global(namespaced)/widget(namespaced)
-      global: {
-        namespaced: true,
-        state: {},
-        mutations: {},
-        modules: {
-          widget: {
-            namespaced: true,
-            state: {},
-            mutations: {}
-          }
-        }
-      }
-    },
-    plugins: [plugin]
-  })
-}
+  if (flag === 'second') {
+    describe(description, () => {
+      let vm = null
 
-function createApp (namespace = null) {
-  const localVue = createLocalVue()
-  localVue.use(Vuex)
+      beforeAll(() => {
+        const wrapper = createApp(namespace)
+        vm = wrapper.vm
+      })
 
-  const store = createStore(createPlugin(
-    {
-      rootModule: {
-        actions: ['setTheme']
-      }
-    },
-    {}
-  ))
+      it('sets initial states', () => {
+        expect(vm.hasUndo).toBeFalsy()
+        expect(vm.hasRedo).toBeFalsy()
+        expect(vm.undoCount).toBe(0)
+        expect(vm.redoCount).toBe(0)
+        expect(vm.historyLength).toBe(1)
+      })
 
-  const component = createComponent(namespace)
+      it('dispatch a action on global module', async () => {
+        expect(vm.lang).toBe('en')
+        vm.setLang('zh')
+        expect(vm.lang).toBe('zh')
+        await flushPromises()
+        // logshot(vm)
+        expect(vm.hasUndo).toBeTruthy()
+        expect(vm.hasRedo).toBeFalsy()
+        expect(vm.undoCount).toBe(1)
+        expect(vm.redoCount).toBe(0)
+        expect(vm.historyLength).toBe(2)
+      })
 
-  return mount(component, {
-    localVue,
-    store
-  })
-}
+      it('commit a mutation on global module', async () => {
+        expect(vm.color).toBe('#fff')
+        vm.changeColor('#4af')
+        expect(vm.color).toBe('#4af')
+        await flushPromises()
+        expect(vm.hasUndo).toBeTruthy()
+        expect(vm.hasRedo).toBeFalsy()
+        expect(vm.undoCount).toBe(2)
+        expect(vm.redoCount).toBe(0)
+        expect(vm.historyLength).toBe(3)
+      })
+
+      it('call custom action(unsubscribed)', async () => {
+        expect(vm.color).toBe('#4af')
+        // begin custom action
+        vm.setState({
+          color: '#af4'
+        })
+        vm.$stateshot.syncState()
+        // end custom action
+        expect(vm.color).toBe('#af4')
+        await flushPromises()
+        expect(vm.hasUndo).toBeTruthy()
+        expect(vm.hasRedo).toBeFalsy()
+        expect(vm.undoCount).toBe(3)
+        expect(vm.redoCount).toBe(0)
+        expect(vm.historyLength).toBe(4)
+      })
+
+      it('call undo multiple times', async () => {
+        await vm.undo()
+        await vm.undo()
+        const { global } = await vm.undo()
+        expect(global.color).toBe('#fff')
+        expect(global.lang).toBe('en')
+        expect(vm.hasUndo).toBeFalsy()
+        expect(vm.hasRedo).toBeTruthy()
+        expect(vm.undoCount).toBe(0)
+        expect(vm.redoCount).toBe(3)
+      })
+
+      it('call redo', async () => {
+        const { global } = await vm.redo()
+        expect(global.color).toBe('#fff')
+        expect(global.lang).toBe('zh')
+        expect(vm.hasUndo).toBeTruthy()
+        expect(vm.hasRedo).toBeTruthy()
+        expect(vm.undoCount).toBe(1)
+        expect(vm.redoCount).toBe(2)
+      })
+
+      it('call reset history', () => {
+        vm.reset()
+        expect(vm.hasUndo).toBeFalsy()
+        expect(vm.hasRedo).toBeFalsy()
+        expect(vm.undoCount).toBe(0)
+        expect(vm.redoCount).toBe(0)
+        expect(vm.historyLength).toBe(0)
+      })
+    })
+  }
+})

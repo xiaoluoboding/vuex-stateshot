@@ -3,10 +3,12 @@
     <h1>Play with the Widget 👇</h1>
 
     <div class="button-group actions">
-      <label for="actions">Actions:</label>
-      <button @click="handleUndo" :disabled="!hasUndo">Undo(<strong>{{undoCount}}</strong>)(⌘ + Z)</button>
-      <button @click="handleRedo" :disabled="!hasRedo">Redo(<strong>{{redoCount}}</strong>)(⌘ + Y)</button>
+      <label for="actions">Undo/Redo:</label>
+      <button @click="handleUndo" :disabled="!hasUndo">Undo(<strong>{{undoCount}}</strong>)(Ctrl/⌘ + Z)</button>
+      <button @click="handleRedo" :disabled="!hasRedo">Redo(<strong>{{redoCount}}</strong>)(Ctrl/⌘ + Y)</button>
     </div>
+
+    <hr>
 
     <div class="button-group mutations">
       <label for="mutations">Mutations:</label>
@@ -37,6 +39,8 @@
       <label for="mutations">Restore:</label>
       <button @click="handleResetHistory">Reset History</button>
     </div>
+
+    <hr>
 
     <smart-widget-grid
       :margin="[5, 5]"
