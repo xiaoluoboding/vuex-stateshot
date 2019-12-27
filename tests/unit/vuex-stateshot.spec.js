@@ -1,11 +1,12 @@
 import flushPromises from 'flush-promises'
 
-import { logshot, createApp } from './helper'
+import { createApp } from './helper'
 
 describe.each([
   ['Test root module', 'rootModule', 'first'],
   ['Test namespaced module', 'global', 'second'],
-  ['Test namespaced module under namespaced module', 'global/widget', 'third']
+  ['Test namespaced module under namespaced module', 'global/widget', 'third'],
+  ['Test Subscribe/Unsubscribe Actions/Mutations', 'global', 'fourth']
 ])('VuexStateshot', (description, namespace, flag) => {
   if (flag === 'first') {
     describe(description, () => {
@@ -246,6 +247,83 @@ describe.each([
         expect(vm.undoCount).toBe(0)
         expect(vm.redoCount).toBe(0)
         expect(vm.historyLength).toBe(0)
+      })
+    })
+  }
+
+  if (flag === 'fourth') {
+    describe(description, () => {
+      let vm = null
+
+      beforeEach(() => {
+        const wrapper = createApp(namespace)
+        vm = wrapper.vm
+      })
+
+      it('sets initial states', () => {
+        expect(vm.hasUndo).toBeFalsy()
+        expect(vm.hasRedo).toBeFalsy()
+        expect(vm.undoCount).toBe(0)
+        expect(vm.redoCount).toBe(0)
+        expect(vm.historyLength).toBe(1)
+      })
+
+      it('Stop/Start subscribe Actions', async () => {
+        expect(vm.lang).toBe('en')
+        vm.setLang('zh')
+        expect(vm.lang).toBe('zh')
+        await flushPromises()
+
+        // Stop subscribe actions
+        vm.$stateshot.unsubscribeAction()
+        vm.setLang('jp')
+        await flushPromises()
+
+        expect(vm.hasUndo).toBeTruthy()
+        expect(vm.hasRedo).toBeFalsy()
+        expect(vm.undoCount).toBe(1)
+        expect(vm.redoCount).toBe(0)
+        expect(vm.historyLength).toBe(2)
+
+        // Resubscribe actions
+        vm.$stateshot.subscribeAction()
+        vm.setLang('jp')
+        await flushPromises()
+
+        expect(vm.hasUndo).toBeTruthy()
+        expect(vm.hasRedo).toBeFalsy()
+        expect(vm.undoCount).toBe(2)
+        expect(vm.redoCount).toBe(0)
+        expect(vm.historyLength).toBe(3)
+      })
+
+      it('Stop/Start subscribe Mutations', async () => {
+        expect(vm.color).toBe('#fff')
+        vm.changeColor('#4af')
+        expect(vm.color).toBe('#4af')
+        await flushPromises()
+
+        // Stop subscribe mutations
+        vm.$stateshot.unsubscribe()
+        vm.changeColor('#4fa')
+        await flushPromises()
+
+        expect(vm.hasUndo).toBeTruthy()
+        expect(vm.hasRedo).toBeFalsy()
+        expect(vm.undoCount).toBe(1)
+        expect(vm.redoCount).toBe(0)
+        expect(vm.historyLength).toBe(2)
+
+        // Resubscribe mutations
+        vm.$stateshot.subscribe()
+        vm.changeColor('#4fa')
+        await flushPromises()
+
+        expect(vm.hasUndo).toBeTruthy()
+        expect(vm.hasRedo).toBeFalsy()
+        expect(vm.undoCount).toBe(2)
+        expect(vm.redoCount).toBe(0)
+        expect(vm.historyLength).toBe(3)
       })
     })
   }
