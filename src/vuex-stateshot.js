@@ -216,7 +216,7 @@ class VuexStateshot {
   }
 }
 
-export function createPlugin (modules, options) {
+export function createPlugin (modules, options = {}) {
   return store => {
     const plugin = new VuexStateshot(store, modules, options)
 
