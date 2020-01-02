@@ -142,12 +142,17 @@ plugins: [
 ]
 ```
 
-**history Options**
+**History Options**
+
+Main options includes
 
 | Name | Description | Type |
 |:--------|:--------|:--------:|
 | maxLength | Max length saving history states, 100 by default. | Number |
 | delay | Debounce time for push in milliseconds, 50 by default. | Number |
+| rules | Optional rules array for optimizing data transforming. | Array |
+| useChunks | Whether serializing state data into chunks. true by default. | Boolean |
+| onChange | Fired when pushing / pulling states with changed state passed in. | - |
 
 ### Plugin Methods
 
@@ -174,12 +179,13 @@ this.$stateshot.syncState()
 > It's all begin;
 > When you call the undo method, you have the state can redo
 
-| Name | Description | Type |
-|:--------|:--------|:--------:|
-| undoCount | The counts of the current state has undo. | Number |
-| redoCount | The counts of the current state has redo. | Number |
-| hasUndo | Whether current state has undo records before. | Boolean |
-| hasRedo | Whether current state has redo records after undo. | Boolean |
+| Name | Description | Type | Default Value |
+|:-----|:------------|:----:|:-------------:|
+| undoCount | The counts of the current state has undo. | Number | 0 |
+| redoCount | The counts of the current state has redo. | Number | 0 |
+| hasUndo | Whether current state has undo records before. | Boolean | false |
+| hasRedo | Whether current state has redo records after undo. | Boolean | false |
+| historyLength | When plugin is created, will sync the rootState as base state. | Number | 1 |
 
 **mapActions**
 
